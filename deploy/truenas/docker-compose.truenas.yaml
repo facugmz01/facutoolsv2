@@ -1,0 +1,100 @@
+# FacuTools — pegar en TrueNAS: Apps → Discover Apps → ⋮ → Install via YAML
+#
+# Antes de instalar:
+#   1. Clonar el repo en /mnt/pool/apps/facutools/repo
+#   2. Crear /mnt/pool/apps/facutools/data y /mnt/pool/apps/facutools/data/postgres
+#   3. Reemplazar /mnt/pool por tu pool real (ej. /mnt/tank)
+#   4. Cambiar POSTGRES_PASSWORD por un secreto fuerte
+#   5. Ajustar el puerto host 8080 si está ocupado
+
+name: facutools
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: facutools-db
+    environment:
+      POSTGRES_USER: facutools
+      POSTGRES_PASSWORD: CHANGE_ME_STRONG_PASSWORD
+      POSTGRES_DB: facutools
+    volumes:
+      - /mnt/pool/apps/facutools/data/postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - facutools
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U facutools -d facutools"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    container_name: facutools-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - /mnt/pool/apps/facutools/data/redis:/data
+    restart: unless-stopped
+    networks:
+      - facutools
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: /mnt/pool/apps/facutools/repo/backend
+      dockerfile: Dockerfile
+    container_name: facutools-backend
+    volumes:
+      - /mnt/pool/apps/facutools/data:/app/data
+    environment:
+      DATABASE_URL: postgresql+asyncpg://facutools:CHANGE_ME_STRONG_PASSWORD@db:5432/facutools
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: CHANGE_ME_GENERATE_A_STRONG_SECRET
+      CLIENT_SECRET_ENCRYPTION_KEY: CHANGE_ME_GENERATE_A_FERNET_KEY
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - facutools
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  frontend:
+    build:
+      context: /mnt/pool/apps/facutools/repo/frontend
+      dockerfile: Dockerfile.prod
+    container_name: facutools-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - facutools
+    x-portals:
+      - host: []
+        name: FacuTools
+        path: /
+        port: 8080
+        scheme: http
+
+networks:
+  facutools:
+    driver: bridge

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ title }}</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2937;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f6f8;padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width:560px;background:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;">
+          <tr>
+            <td style="background:{{ severity_color }};padding:16px 24px;color:#ffffff;">
+              <div style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.9;">{{ app_name }} · {{ severity }}</div>
+              <div style="font-size:20px;font-weight:600;margin-top:4px;">{{ title }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px;">
+              {% if domain_name %}
+              <p style="margin:0 0 12px;font-size:14px;color:#6b7280;">Domain: <strong style="color:#111827;">{{ domain_name }}</strong></p>
+              {% endif %}
+              <p style="margin:0;font-size:15px;line-height:1.55;white-space:pre-wrap;">{{ message }}</p>
+              <p style="margin:20px 0 0;font-size:12px;color:#9ca3af;">Type: {{ alert_type }}</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:12px 24px;background:#f9fafb;border-top:1px solid #e5e7eb;font-size:12px;color:#9ca3af;">
+              Sent by {{ app_name }}
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

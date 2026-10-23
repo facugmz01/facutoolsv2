@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>IPScope — IP & DNS Lookup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="logo">IP<span>Scope</span></div>
+            <nav class="tabs" role="tablist" aria-label="Herramientas">
+                <button class="tab active" role="tab" aria-selected="true" aria-controls="tab-ip" id="tab-btn-ip" data-tab="ip" onclick="switchTab('ip')">IP Lookup</button>
+                <button class="tab" role="tab" aria-selected="false" aria-controls="tab-dns" id="tab-btn-dns" data-tab="dns" tabindex="-1" onclick="switchTab('dns')">DNS Checker</button>
+                <button class="tab" role="tab" aria-selected="false" aria-controls="tab-whois" id="tab-btn-whois" data-tab="whois" tabindex="-1" onclick="switchTab('whois')">WHOIS</button>
+                <button class="tab" role="tab" aria-selected="false" aria-controls="tab-prop" id="tab-btn-prop" data-tab="prop" tabindex="-1" onclick="switchTab('prop')">Propagación DNS</button>
+                <button class="tab" role="tab" aria-selected="false" aria-controls="tab-ransom" id="tab-btn-ransom" data-tab="ransom" tabindex="-1" onclick="switchTab('ransom')">Ransomware</button>
+                <button class="tab" role="tab" aria-selected="false" aria-controls="tab-mac" id="tab-btn-mac" data-tab="mac" tabindex="-1" onclick="switchTab('mac')">MAC Lookup</button>
+                <button class="tab" role="tab" aria-selected="false" aria-controls="tab-passgen" id="tab-btn-passgen" data-tab="passgen" tabindex="-1" onclick="switchTab('passgen')">Contraseñas</button>
+                <button class="tab" role="tab" aria-selected="false" aria-controls="tab-ipcalc" id="tab-btn-ipcalc" data-tab="ipcalc" tabindex="-1" onclick="switchTab('ipcalc')">Calc. IP</button>
+                <button class="tab" role="tab" aria-selected="false" aria-controls="tab-smtp" id="tab-btn-smtp" data-tab="smtp" tabindex="-1" onclick="switchTab('smtp')">SMTP Tester</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ══ TAB: IP LOOKUP ══════════════════════════════════════ -->
+    <main class="main" id="tab-ip" role="tabpanel" aria-labelledby="tab-btn-ip" aria-live="polite">
+
+        <section class="search-section">
+            <div class="search-bar">
+                <span class="search-icon" aria-hidden="true">⌕</span>
+                <div class="input-wrap">
+                    <input type="text" id="ipInput" placeholder="Ingresá una IP o dominio..." autocomplete="off" spellcheck="false" aria-label="IP o dominio a buscar" />
+                    <div id="history-ip" class="search-history hidden"></div>
+                </div>
+                <button class="btn-primary" onclick="buscarIP()">Buscar</button>
+                <button class="btn-secondary" onclick="miIP()">Mi IP</button>
+            </div>
+        </section>
+
+        <div id="resultado" class="resultado hidden">
+            <div class="ip-hero">
+                <div class="ip-flag" id="heroFlag"></div>
+                <div class="ip-info">
+                    <div class="ip-address" id="heroIP"></div>
+                    <div class="ip-location" id="heroLocation"></div>
+                </div>
+                <div class="ip-time" id="heroTime"></div>
+            </div>
+
+            <div class="grid">
+                <div class="card" id="card-ubicacion">
+                    <div class="card-header"><span class="card-icon">📍</span><h2>Ubicación</h2></div>
+                    <div class="card-body" id="secUbicacion"></div>
+                </div>
+                <div class="card" id="card-red">
+                    <div class="card-header"><span class="card-icon">🔌</span><h2>Red</h2></div>
+                    <div class="card-body" id="secRed"></div>
+                </div>
+                <div class="card" id="card-horario">
+                    <div class="card-header"><span class="card-icon">🕒</span><h2>Zona Horaria</h2></div>
+                    <div class="card-body" id="secHorario"></div>
+                </div>
+                <div class="card" id="card-moneda">
+                    <div class="card-header"><span class="card-icon">💱</span><h2>Moneda</h2></div>
+                    <div class="card-body" id="secMoneda"></div>
+                </div>
+                <div class="card card-wide" id="card-amenazas">
+                    <div class="card-header"><span class="card-icon">🛡</span><h2>Evaluación de Amenazas</h2></div>
+                    <div class="card-body" id="secAmenazas"></div>
+                </div>
+                <div class="card card-wide" id="card-blacklist">
+                    <div class="card-header">
+                        <span class="card-icon">🚫</span><h2>Blacklists</h2>
+                        <div class="card-header-actions">
+                            <span class="bl-summary hidden" id="blSummary"></span>
+                            <button class="btn-check" id="btnBlacklist" onclick="verificarBlacklist()">Verificar</button>
+                        </div>
+                    </div>
+                    <div class="card-body" id="secBlacklist">
+                        <div class="bl-idle">
+                            <p>Consultá 28 listas DNSBL públicas + AbuseIPDB + FortiGuard</p>
+                            <div class="bl-sources">
+                                <span class="bl-tag bl-tag-spamhaus">Spamhaus ZEN/SBL/XBL/PBL</span>
+                                <span class="bl-tag">Barracuda</span>
+                                <span class="bl-tag">UCEProtect L1/L2/L3</span>
+                                <span class="bl-tag">SpamCop</span>
+                                <span class="bl-tag">PSBL</span>
+                                <span class="bl-tag">0spam</span>
+                                <span class="bl-tag">Mailspike</span>
+                                <span class="bl-tag">AnonMails</span>
+                                <span class="bl-tag">Woody</span>
+                                <span class="bl-tag">IMP RBL</span>
+                                <span class="bl-tag">Nether Relays</span>
+                                <span class="bl-tag">DroneBL</span>
+                                <span class="bl-tag">CBL</span>
+                                <span class="bl-tag">Abuse.ch</span>
+                                <span class="bl-tag">Backscatterer</span>
+                                <span class="bl-tag">Team Cymru</span>
+                                <span class="bl-tag">AbuseIPDB</span>
+                                <span class="bl-tag bl-tag-forti">FortiGuard ↗</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-wide" id="card-mapa">
+                    <div class="card-header"><span class="card-icon">🗺</span><h2>Mapa</h2></div>
+                    <div class="card-body" id="secMapa"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div><p>Consultando...</p>
+        </div>
+        <div id="error" class="error-msg hidden"></div>
+    </main>
+
+    <!-- ══ TAB: DNS CHECKER ════════════════════════════════════ -->
+    <main class="main hidden" id="tab-dns" role="tabpanel" aria-labelledby="tab-btn-dns" aria-live="polite">
+
+        <section class="search-section">
+            <div class="search-bar">
+                <span class="search-icon" aria-hidden="true">⌕</span>
+                <div class="input-wrap">
+                    <input type="text" id="dnsInput" placeholder="Ingresá un dominio (ej: google.com)..." autocomplete="off" spellcheck="false" aria-label="Dominio a consultar" />
+                    <div id="history-dns" class="search-history hidden"></div>
+                </div>
+                <button class="btn-primary" onclick="buscarDNS()">Consultar DNS</button>
+            </div>
+        </section>
+
+        <div id="dns-resultado" class="resultado hidden">
+
+            <div class="ip-hero">
+                <div class="ip-info">
+                    <div class="ip-address" id="dnsHeroDomain"></div>
+                    <div class="ip-location" id="dnsHeroIP"></div>
+                </div>
+                <div class="ip-time" id="dnsHeroTypes"></div>
+            </div>
+
+            <!-- Seguridad de email -->
+            <div class="card card-wide" id="dns-card-segemail">
+                <div class="card-header"><span class="card-icon">✉</span><h2>Seguridad de Email</h2></div>
+                <div class="card-body" id="dns-secEmail"></div>
+            </div>
+
+            <!-- Proveedores detectados -->
+            <div class="card card-wide" id="dns-card-providers">
+                <div class="card-header"><span class="card-icon">☁</span><h2>Proveedores Detectados</h2></div>
+                <div class="card-body" id="dns-secProviders"></div>
+            </div>
+
+            <!-- NS -->
+            <div class="card card-wide" id="dns-card-ns">
+                <div class="card-header"><span class="card-icon">🔗</span><h2>Nameservers (NS)</h2></div>
+                <div class="card-body" id="dns-secNS"></div>
+            </div>
+
+            <!-- Registros por tipo -->
+            <div id="dns-records-grid" class="grid"></div>
+
+        </div>
+
+        <div id="dns-loading" class="loading hidden">
+            <div class="spinner"></div><p>Consultando registros DNS...</p>
+        </div>
+        <div id="dns-error" class="error-msg hidden"></div>
+    </main>
+
+    <!-- ══ TAB: PROPAGACIÓN DNS ════════════════════════════════ -->
+    <main class="main hidden" id="tab-prop" role="tabpanel" aria-labelledby="tab-btn-prop" aria-live="polite">
+
+        <section class="search-section">
+            <div class="search-bar">
+                <span class="search-icon" aria-hidden="true">⌕</span>
+                <div class="input-wrap">
+                    <input type="text" id="propInput" placeholder="Dominio a verificar (ej: google.com)..." autocomplete="off" spellcheck="false" aria-label="Dominio a verificar" />
+                    <div id="history-prop" class="search-history hidden"></div>
+                </div>
+                <div class="prop-type-wrap">
+                    <select id="propType" class="prop-type-select" aria-label="Tipo de registro DNS">
+                        <option value="A">A</option>
+                        <option value="AAAA">AAAA</option>
+                        <option value="MX">MX</option>
+                        <option value="NS">NS</option>
+                        <option value="TXT">TXT</option>
+                        <option value="CNAME">CNAME</option>
+                        <option value="SOA">SOA</option>
+                    </select>
+                </div>
+                <button class="btn-primary" onclick="buscarProp()">Verificar</button>
+            </div>
+        </section>
+
+        <div id="prop-resultado" class="resultado hidden">
+
+            <div class="ip-hero" id="prop-hero">
+                <div class="ip-info">
+                    <div class="ip-address" id="propHeroDomain"></div>
+                    <div class="ip-location" id="propHeroInfo"></div>
+                </div>
+                <div class="ip-time" id="propHeroStats"></div>
+            </div>
+
+            <div class="card card-wide">
+                <div class="card-header">
+                    <span class="card-icon">🌍</span>
+                    <h2>Resultados por servidor DNS</h2>
+                    <span class="dns-count" id="propCount"></span>
+                </div>
+                <div class="card-body" id="prop-secResults"></div>
+            </div>
+
+        </div>
+
+        <div id="prop-loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p id="prop-loading-txt">Consultando 21 servidores DNS globales...</p>
+        </div>
+        <div id="prop-error" class="error-msg hidden"></div>
+    </main>
+
+
+    <!-- ══ TAB: WHOIS ══════════════════════════════════════════ -->
+    <main class="main hidden" id="tab-whois" role="tabpanel" aria-labelledby="tab-btn-whois" aria-live="polite">
+
+        <section class="search-section">
+            <div class="search-bar">
+                <span class="search-icon" aria-hidden="true">⌕</span>
+                <div class="input-wrap">
+                    <input type="text" id="whoisInput" placeholder="Ingresá un dominio (ej: nic.ar, google.com)..." autocomplete="off" spellcheck="false" aria-label="Dominio para WHOIS" />
+                    <div id="history-whois" class="search-history hidden"></div>
+                </div>
+                <button class="btn-primary" onclick="buscarWhois()">Consultar WHOIS</button>
+            </div>
+        </section>
+
+        <div id="whois-resultado" class="resultado hidden">
+
+            <div class="ip-hero" id="whois-hero">
+                <div class="ip-info">
+                    <div class="ip-address" id="whoisHeroDomain"></div>
+                    <div class="ip-location" id="whoisHeroSource"></div>
+                </div>
+                <div class="ip-time" id="whoisHeroExpiry"></div>
+            </div>
+
+            <div class="grid">
+                <div class="card card-wide">
+                    <div class="card-header"><span class="card-icon">📋</span><h2>Estado del Dominio</h2></div>
+                    <div class="card-body" id="whois-secStatus"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-icon">📅</span><h2>Fechas</h2></div>
+                    <div class="card-body" id="whois-secDates"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-icon">🏢</span><h2>Registrar</h2></div>
+                    <div class="card-body" id="whois-secRegistrar"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-icon">👤</span><h2>Titular / Registrant</h2></div>
+                    <div class="card-body" id="whois-secRegistrant"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-icon">🔗</span><h2>Nameservers</h2></div>
+                    <div class="card-body" id="whois-secNS"></div>
+                </div>
+
+                <div class="card card-wide">
+                    <div class="card-header"><span class="card-icon">🔒</span><h2>Seguridad</h2></div>
+                    <div class="card-body" id="whois-secSecurity"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="whois-loading" class="loading hidden">
+            <div class="spinner"></div><p>Consultando RDAP...</p>
+        </div>
+        <div id="whois-error" class="error-msg hidden"></div>
+    </main>
+
+    <!-- ══ TAB: RANSOMWARE ═════════════════════════════════════ -->
+    <main class="main hidden" id="tab-ransom" role="tabpanel" aria-labelledby="tab-btn-ransom" aria-live="polite">
+
+        <section class="search-section">
+            <div class="search-bar" style="flex-wrap: wrap; gap: 10px;">
+                <select id="ransomMethod" class="prop-type-select" onchange="actualizarCamposRansomware()" aria-label="Método de la API">
+                    <option value="victims/recent">Últimas víctimas</option>
+                    <option value="victims/search">Buscar víctimas (Keyword)</option>
+                    <option value="groups">Lista de Grupos</option>
+                    <option value="group">Info de un Grupo</option>
+                    <option value="iocs">IOCs por Grupo</option>
+                    <option value="ransomnotes">Notas de Rescate por Grupo</option>
+                    <option value="yara">Reglas YARA por Grupo</option>
+                    <option value="press/recent">Ciberataques en Prensa</option>
+                    <option value="csirt">Contactos CSIRT por País</option>
+                    <option value="stats">Estadísticas Globales</option>
+                </select>
+                <div class="input-wrap" id="ransomParam1Wrap" style="display:none; flex: 1; min-width: 150px;">
+                    <input type="text" id="ransomParam1" placeholder="..." autocomplete="off" spellcheck="false" />
+                </div>
+                <button class="btn-primary" onclick="cargarRansomware(true)">Consultar</button>
+            </div>
+            
+            <div class="search-bar" style="margin-top: 15px; background: rgba(0,0,0,0.1); border-color: rgba(255,255,255,0.05);">
+                <span class="search-icon" aria-hidden="true" style="opacity: 0.5;">⌕</span>
+                <div class="input-wrap">
+                    <input type="text" id="ransomInput" placeholder="Filtrar resultados en pantalla..." autocomplete="off" spellcheck="false" onkeyup="filtrarRansomware()" style="font-size: 0.95rem; opacity: 0.8;" />
+                </div>
+            </div>
+        </section>
+
+        <div id="ransom-loading" class="loading hidden">
+            <div class="skeleton title"></div>
+            <div class="skeleton text"></div>
+            <div class="skeleton text"></div>
+            <div class="skeleton text short"></div>
+            <div style="margin-top:20px;width:100%">
+                <div class="skeleton title" style="width:20%"></div>
+                <div class="skeleton text"></div>
+                <div class="skeleton text short"></div>
+            </div>
+        </div>
+
+        <div id="ransom-resultado" class="results-container hidden">
+            <div class="ransom-header-info">
+                <h2 id="ransom-title">Últimas víctimas detectadas</h2>
+                <span id="ransom-count" class="badge b-dim">0</span>
+            </div>
+            <div id="ransom-grid" class="ransom-grid">
+                <!-- Se inyectan las tarjetas acá -->
+            </div>
+        </div>
+
+        <div id="ransom-error" class="error-msg hidden"></div>
+    </main>
+
+    <!-- ══ TAB: MAC LOOKUP ════════════════════════════════════ -->
+    <main class="main hidden" id="tab-mac" role="tabpanel" aria-labelledby="tab-btn-mac" aria-live="polite">
+        <section class="search-section">
+            <div class="search-bar">
+                <span class="search-icon" aria-hidden="true">💻</span>
+                <div class="input-wrap">
+                    <input type="text" id="macInput" placeholder="Dirección MAC (ej: FC:FB:FB:01:FA:21, FC-FB-FB o fcfbfb)..." autocomplete="off" spellcheck="false" />
+                </div>
+                <button class="btn-primary" onclick="buscarMAC()">Consultar</button>
+            </div>
+        </section>
+
+        <div id="mac-loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Consultando base de datos MACVendors...</p>
+        </div>
+
+        <div id="mac-resultado" class="results-container hidden">
+            <div class="card card-wide" style="border:1px solid rgba(255,255,255,0.05); background:linear-gradient(135deg, var(--bg2) 0%, rgba(20,24,33,0.95) 100%)">
+                <div class="card-header" style="border-bottom:1px solid rgba(255,255,255,0.05)">
+                    <span class="card-icon">⚡</span>
+                    <h2>Fabricante de Hardware Resuelto</h2>
+                </div>
+                <div class="card-body" style="padding:24px; display:flex; flex-direction:column; gap:20px">
+                    <div style="background:rgba(88,166,255,0.05); border:1px solid rgba(88,166,255,0.15); padding:24px; border-radius:12px; text-align:center;">
+                        <div style="font-size:12px; color:#58a6ff; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px">🏢 Fabricante / Vendor</div>
+                        <div style="display:inline-flex; align-items:center; gap:8px; justify-content:center; flex-wrap:wrap;">
+                            <span id="mac-vendor-val" style="font-size:28px; font-weight:800; color:var(--text); text-shadow:0 0 10px rgba(88,166,255,0.2)">Apple, Inc.</span>
+                            <button class="btn-copy" onclick="copyText(document.getElementById('mac-vendor-val').textContent, this)" aria-label="Copiar Fabricante" title="Copiar Fabricante"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                        </div>
+                    </div>
+                    <div style="background:rgba(0,0,0,0.15); border-radius:10px; padding:16px; border:1px solid rgba(255,255,255,0.03); display:flex; flex-direction:column; gap:10px; font-size:13px">
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.03); padding-bottom:8px">
+                            <span style="color:var(--text-dim)">🔌 Dirección MAC consultada:</span>
+                            <div style="display:flex; align-items:center; gap:4px">
+                                <span id="mac-queried-val" style="font-weight:600; color:var(--text); font-family:var(--mono)">FC:FB:FB:01:FA:21</span>
+                                <button class="btn-copy" onclick="copyText(document.getElementById('mac-queried-val').textContent, this)" aria-label="Copiar MAC" title="Copiar MAC"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                            </div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.03); padding-bottom:8px">
+                            <span style="color:var(--text-dim)">🏷️ Prefijo OUI (Identificador de Organización):</span>
+                            <div style="display:flex; align-items:center; gap:4px">
+                                <span id="mac-oui-val" style="font-weight:600; color:var(--text); font-family:var(--mono)">FC:FB:FB</span>
+                                <button class="btn-copy" onclick="copyText(document.getElementById('mac-oui-val').textContent, this)" aria-label="Copiar OUI" title="Copiar OUI"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                            </div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center">
+                            <span style="color:var(--text-dim)">🌐 Origen de la Consulta:</span>
+                            <span id="mac-source-val" style="font-weight:500; color:var(--accent); font-size:11px; text-transform:uppercase; font-weight:bold; letter-spacing:0.05em">macvendors.com V1 (API Key)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="mac-error" class="error-msg hidden"></div>
+    </main>
+
+    <!-- ══ TAB: PASSWORD GENERATOR ═════════════════════════════ -->
+    <main class="main hidden" id="tab-passgen" role="tabpanel" aria-labelledby="tab-btn-passgen" aria-live="polite">
+        <section class="search-section">
+            <div class="card card-wide" style="max-width: 600px; margin: 0 auto; background: var(--bg2);">
+                <div class="card-header"><span class="card-icon">🔑</span><h2>Generador de Contraseñas</h2></div>
+                <div class="card-body">
+                    <div class="data-row" style="display:flex; align-items:center; gap:10px; margin-bottom:20px; border:none;">
+                        <label class="data-label" for="passLength" style="width:auto">Longitud de caracteres:</label>
+                        <input type="number" id="passLength" value="16" min="8" max="128" style="width: 80px; padding: 6px 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-family: var(--mono);">
+                    </div>
+                    <div style="display:flex; gap: 15px; flex-wrap: wrap; margin-bottom: 25px; user-select: none;">
+                        <label style="cursor:pointer; display:flex; align-items:center; gap:5px"><input type="checkbox" id="passUpper" checked> Mayúsculas (A-Z)</label>
+                        <label style="cursor:pointer; display:flex; align-items:center; gap:5px"><input type="checkbox" id="passLower" checked> Minúsculas (a-z)</label>
+                        <label style="cursor:pointer; display:flex; align-items:center; gap:5px"><input type="checkbox" id="passNum" checked> Números (0-9)</label>
+                        <label style="cursor:pointer; display:flex; align-items:center; gap:5px"><input type="checkbox" id="passSym" checked> Símbolos (!@#$)</label>
+                    </div>
+                    <button class="btn-primary" onclick="generatePassword()" style="width: 100%; justify-content: center;">Generar Contraseña Segura</button>
+                    
+                    <div style="margin-top: 25px; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 8px; text-align: center; border: 1px dashed var(--border);">
+                        <div id="passResult" style="min-height: 40px; display:flex; align-items:center; justify-content:center; gap:10px;">
+                            <span style="color:var(--text-dim)">Configurá las opciones y hacé clic en generar...</span>
+                        </div>
+                        <div style="margin-top: 15px; font-size: 13px; color: var(--text-dim);">
+                            Fortaleza estimada: <span id="passStrength" style="font-weight:bold">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ══ TAB: IP CALCULATOR ══════════════════════════════════ -->
+    <main class="main hidden" id="tab-ipcalc" role="tabpanel" aria-labelledby="tab-btn-ipcalc" aria-live="polite">
+        <section class="search-section">
+            <div class="search-bar">
+                <span class="search-icon" aria-hidden="true">🧮</span>
+                <div class="input-wrap">
+                    <input type="text" id="ipCalcInput" placeholder="Ingresá Red / Máscara CIDR (ej: 192.168.1.10/24)..." autocomplete="off" spellcheck="false" />
+                </div>
+                <button class="btn-primary" onclick="calculateIP()">Calcular Subred</button>
+            </div>
+        </section>
+        <div id="ipCalcResult" class="results-container hidden"></div>
+    </main>
+
+    <!-- ══ TAB: SMTP TESTER ════════════════════════════════════ -->
+    <main class="main hidden" id="tab-smtp" role="tabpanel" aria-labelledby="tab-btn-smtp" aria-live="polite">
+        <section class="search-section">
+            <div class="card card-wide" style="max-width: 800px; margin: 0 auto; background: var(--bg2);">
+                <div class="card-header"><span class="card-icon">✉️</span><h2>Probador de Conexiones SMTP</h2></div>
+                <div class="card-body" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div style="display:flex; flex-direction:column; gap:5px"><label class="data-label">Servidor SMTP *</label><input type="text" id="smtpHost" placeholder="ej: smtp.gmail.com" style="padding:10px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text)"></div>
+                    <div style="display:flex; flex-direction:column; gap:5px"><label class="data-label">Puerto *</label><input type="number" id="smtpPort" placeholder="587" value="587" style="padding:10px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text)"></div>
+                    <div style="display:flex; flex-direction:column; gap:5px"><label class="data-label">Seguridad TLS/SSL</label><select id="smtpSecurity" style="padding:10px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text)"><option value="auto">Auto (STARTTLS si permite)</option><option value="ssl">SSL / TLS Implícito (Ej. puerto 465)</option><option value="none">Ninguna</option></select></div>
+                    <div style="display:flex; flex-direction:column; gap:5px"><label class="data-label">Mail FROM (Opcional)</label><input type="text" id="smtpFrom" placeholder="remitente@dominio.com" style="padding:10px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text)"></div>
+                    <div style="display:flex; flex-direction:column; gap:5px"><label class="data-label">RCPT TO (Opcional)</label><input type="text" id="smtpTo" placeholder="destinatario@dominio.com" style="padding:10px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text)"></div>
+                    <div style="display:flex; flex-direction:column; gap:5px"><label class="data-label">Usuario Auth (Opcional)</label><input type="text" id="smtpUser" placeholder="usuario@dominio.com" style="padding:10px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text)"></div>
+                    <div style="display:flex; flex-direction:column; gap:5px"><label class="data-label">Contraseña Auth (Opcional)</label><input type="password" id="smtpPass" placeholder="••••••••" style="padding:10px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text)"></div>
+                    <div style="grid-column: 1 / -1; margin-top: 10px;">
+                        <button class="btn-primary" onclick="testSMTP()" style="width:100%; justify-content:center; padding:12px;">Ejecutar Diagnóstico de Conexión SMTP</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div id="smtp-loading" class="loading hidden"><div class="spinner"></div><p>Estableciendo conexión por sockets...</p></div>
+        <div id="smtp-resultado" class="results-container hidden" style="margin-top: 20px;"></div>
+    </main>
+
+    <footer class="site-footer">
+        Desarrollado por Facundo Gomez · Potenciado por <a href="https://ipdata.co" target="_blank">ipdata.co</a> y <a href="https://ransomware.live" target="_blank">Ransomware.live</a> (Source: Ransomware.live)
+    </footer>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

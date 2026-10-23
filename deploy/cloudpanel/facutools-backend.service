@@ -1,0 +1,22 @@
+[Unit]
+Description=FacuTools API (uvicorn)
+After=network.target
+
+[Service]
+Type=simple
+User=__SITEUSER__
+Group=__SITEUSER__
+WorkingDirectory=__APP_ROOT__
+EnvironmentFile=-__APP_ROOT__/.env
+Environment=PYTHONPATH=__APP_ROOT__/repo/backend
+# Prefer DATABASE_URL from EnvironmentFile (.env). Fallback only for empty installs.
+Environment=DATABASE_URL=postgresql+asyncpg://facutools:CHANGE_ME@127.0.0.1:5432/facutools
+ExecStart=__APP_ROOT__/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=5
+
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

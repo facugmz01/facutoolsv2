@@ -1,0 +1,44 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.4",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "{{ app_name }}",
+      "size": "Small",
+      "weight": "Bolder",
+      "color": "Accent"
+    },
+    {
+      "type": "TextBlock",
+      "text": {{ title | tojson }},
+      "size": "Large",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "type": "FactSet",
+      "facts": [
+        {
+          "title": "Severity",
+          "value": {{ severity | tojson }}
+        },
+        {
+          "title": "Type",
+          "value": {{ alert_type | tojson }}
+        }{% if domain_name %},
+        {
+          "title": "Domain",
+          "value": {{ domain_name | tojson }}
+        }{% endif %}
+      ]
+    },
+    {
+      "type": "TextBlock",
+      "text": {{ message | tojson }},
+      "wrap": true,
+      "spacing": "Medium"
+    }
+  ]
+}

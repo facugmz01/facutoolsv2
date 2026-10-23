@@ -1,0 +1,8 @@
+# Bloquear archivos que no deben ser accedidos directamente
+<Files "config.php">
+    Require all denied
+</Files>
+<Files "ipinfo.php">
+    Require all denied
+</Files>
+# test_spamrats.php tiene su propia protección por token

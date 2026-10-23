@@ -1,0 +1,81 @@
+# FacuTools — proyecto para Arcane (TrueNAS / Docker)
+#
+# Este archivo debe vivir en la carpeta del proyecto, junto a backend/ y frontend/.
+# Ver README.md para la estructura recomendada y el mount de PROJECTS_DIRECTORY.
+#
+# Ejemplo de layout en el NAS:
+#   /mnt/Datos/Archivos/facutools/
+#   ├── compose.yaml   ← este archivo
+#   ├── .env
+#   ├── backend/
+#   ├── frontend/
+#   └── data/
+#       └── postgres/  ← datos de PostgreSQL
+
+name: facutools
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: facutools-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-facutools}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-facutools}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - facutools
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-facutools} -d ${POSTGRES_DB:-facutools}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: facutools-backend
+    volumes:
+      - ./data:/app/data
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-facutools}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-facutools}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - facutools
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: facutools-frontend
+    ports:
+      - "${FACUTOOLS_HTTP_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - facutools
+
+networks:
+  facutools:
+    driver: bridge

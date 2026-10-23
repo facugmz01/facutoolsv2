@@ -1,0 +1,75 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: domaintools-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-facutools}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-facutools}
+      POSTGRES_DB: ${POSTGRES_DB:-facutools}
+    volumes:
+      - domaintools-pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-facutools} -d ${POSTGRES_DB:-facutools}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    container_name: domaintools-redis
+    volumes:
+      - domaintools-redisdata:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: domaintools-backend
+    ports:
+      - "8001:8000"
+    volumes:
+      - domaintools-data:/app/data
+      - ./VERSION:/app/VERSION:ro
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-facutools}:${POSTGRES_PASSWORD:-facutools}@db:5432/${POSTGRES_DB:-facutools}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY must be set}
+      CLIENT_SECRET_ENCRYPTION_KEY: ${CLIENT_SECRET_ENCRYPTION_KEY:?CLIENT_SECRET_ENCRYPTION_KEY must be set}
+      ENTRA_ONBOARDING_CLIENT_ID: ${ENTRA_ONBOARDING_CLIENT_ID:-}
+      ENTRA_ONBOARDING_CLIENT_SECRET: ${ENTRA_ONBOARDING_CLIENT_SECRET:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  frontend:
+    build: ./frontend
+    container_name: domaintools-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_PROXY_TARGET=http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  domaintools-data:
+  domaintools-pgdata:
+  domaintools-redisdata:

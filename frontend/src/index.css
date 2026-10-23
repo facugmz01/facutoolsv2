@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-canvas: 248 250 252; /* slate-50 */
+    --color-surface: 255 255 255;
+    --color-surface-hover: 248 250 252; /* slate-50 */
+    --color-foreground: 15 23 42; /* slate-900 */
+    --color-foreground-secondary: 51 65 85; /* slate-700 */
+    --color-muted: 241 245 249; /* slate-100 */
+    --color-muted-foreground: 100 116 139; /* slate-500 */
+    --color-border: 226 232 240; /* slate-200 */
+    --color-shadow: 15 23 42;
+  }
+
+  .dark {
+    --color-canvas: 11 18 32; /* #0b1220 */
+    --color-surface: 15 23 42; /* #0f172a / slate-900 */
+    --color-surface-hover: 30 41 59; /* slate-800 */
+    --color-foreground: 241 245 249; /* slate-100 */
+    --color-foreground-secondary: 203 213 225; /* slate-300 */
+    --color-muted: 30 41 59; /* slate-800 */
+    --color-muted-foreground: 148 163 184; /* slate-400 */
+    --color-border: 30 41 59; /* slate-800 */
+    --color-shadow: 0 0 0;
+  }
+
+  body {
+    @apply antialiased font-sans bg-canvas text-foreground;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-surface border border-border rounded-xl p-6 shadow-card;
+  }
+  .btn-primary {
+    @apply bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg font-medium transition-colors;
+  }
+  .btn-secondary {
+    @apply bg-surface hover:bg-surface-hover text-foreground-secondary px-4 py-2 rounded-lg font-medium transition-colors border border-border;
+  }
+  .input {
+    @apply bg-surface border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent;
+  }
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  .badge-success { @apply bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400; }
+  .badge-warning { @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400; }
+  .badge-danger { @apply bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400; }
+  .badge-info { @apply bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-400; }
+  .sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+    clip: rect(0, 0, 0, 0);
+  }
+}

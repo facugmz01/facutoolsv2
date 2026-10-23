@@ -1,0 +1,13 @@
+# ── Bloquear acceso directo al .env ───────────────────────────
+<Files ".env">
+    Require all denied
+</Files>
+<Files ".env.example">
+    Require all denied
+</Files>
+
+# ── Bloquear acceso al api/ desde el navegador directamente ───
+# Los archivos PHP en /api/ solo deben llamarse desde el backend
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+</IfModule>

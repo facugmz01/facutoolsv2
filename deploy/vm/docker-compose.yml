@@ -1,0 +1,102 @@
+# FacuTools — producción en VM (Docker Compose)
+#
+# Uso típico (desde la raíz del repo clonado):
+#   cd deploy/vm
+#   cp .env.example .env   # o ./scripts/install.sh
+#   docker compose --env-file .env up -d --build
+#
+# Solo el frontend (nginx) se publica. Backend y Postgres quedan en la red interna.
+
+name: facutools
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: facutools-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-facutools}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-facutools}
+    volumes:
+      - ${FACUTOOLS_DATA:-./data}/postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - facutools
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-facutools} -d ${POSTGRES_DB:-facutools}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  redis:
+    image: redis:7-alpine
+    container_name: facutools-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - ${FACUTOOLS_DATA:-./data}/redis:/data
+    restart: unless-stopped
+    networks:
+      - facutools
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    container_name: facutools-backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-facutools}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-facutools}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env}
+      CLIENT_SECRET_ENCRYPTION_KEY: ${CLIENT_SECRET_ENCRYPTION_KEY:?Set CLIENT_SECRET_ENCRYPTION_KEY in .env}
+    volumes:
+      - ${FACUTOOLS_DATA:-./data}:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - facutools
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 25s
+
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile.prod
+    container_name: facutools-frontend
+    ports:
+      - "${FACUTOOLS_HTTP_PORT:-80}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - facutools
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  facutools:
+    driver: bridge

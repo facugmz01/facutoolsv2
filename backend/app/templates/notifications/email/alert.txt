@@ -1,0 +1,9 @@
+{{ app_name }} — {{ severity|upper }}
+
+{{ title }}
+
+{% if domain_name %}Domain: {{ domain_name }}
+{% endif %}
+{{ message }}
+
+Type: {{ alert_type }}

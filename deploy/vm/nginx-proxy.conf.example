@@ -1,0 +1,25 @@
+# Ejemplo de reverse proxy nginx en el host → FacuTools (contenedor :80 o :8080)
+#
+# 1. sudo apt install nginx certbot python3-certbot-nginx
+# 2. Copiar a /etc/nginx/sites-available/facutools
+# 3. Ajustar server_name y proxy_pass
+# 4. sudo ln -s /etc/nginx/sites-available/facutools /etc/nginx/sites-enabled/
+# 5. sudo nginx -t && sudo systemctl reload nginx
+# 6. sudo certbot --nginx -d facutools.tudominio.com
+
+server {
+    listen 80;
+    server_name facutools.tudominio.com;
+
+    client_max_body_size 50m;
+
+    location / {
+        proxy_pass http://127.0.0.1:80;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 300s;
+    }
+}
