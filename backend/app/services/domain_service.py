@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 from datetime import datetime, timedelta, timezone
 from time import monotonic
 from typing import Awaitable, Callable
@@ -21,7 +20,6 @@ from app.utils.domain_validation import (
 )
 
 
-MAX_COMPARE_DOMAINS = 5
 _PREVIEW_CACHE_TTL_SECONDS = 300
 _PREVIEW_CACHE: dict[str, tuple[float, dict]] = {}
 
@@ -614,44 +612,6 @@ class DomainService:
                 {"month": "Jun", "value": total_value},
             ],
         )
-
-    async def compare_domains(self, domain_names: list[str]) -> dict:
-        names: list[str] = []
-        for raw in domain_names:
-            valid, error, normalized = validate_domain(raw)
-            if not valid:
-                raise ValueError(f"{raw.strip() or '(vacío)'}: {error}")
-            if normalized not in names:
-                names.append(normalized)
-        if len(names) < 2:
-            raise ValueError("Ingresá al menos 2 dominios distintos para comparar")
-        if len(names) > MAX_COMPARE_DOMAINS:
-            raise ValueError(f"Se pueden comparar hasta {MAX_COMPARE_DOMAINS} dominios")
-
-        async def _scan(name: str) -> dict:
-            try:
-                scan = await full_domain_scan(name)
-            except Exception as exc:
-                return {"error": str(exc) or exc.__class__.__name__}
-            ssl = scan.get("ssl")
-            health = scan.get("health") or {}
-            email = scan.get("email_security")
-            subs = scan.get("subdomains")
-            bl = scan.get("blacklists")
-            tech = scan.get("tech_stack")
-            return {
-                "ssl_valid": ssl.is_valid if ssl else False,
-                "ssl_days": ssl.days_remaining if ssl else None,
-                "is_up": health.get("is_up", False),
-                "response_time": health.get("response_time_ms"),
-                "email_score": email.score if email else 0,
-                "subdomains": subs.total_found if subs else 0,
-                "blacklisted": bl.is_listed if bl else False,
-                "technologies": len(tech.technologies) if tech else 0,
-            }
-
-        results = await asyncio.gather(*(_scan(n) for n in names))
-        return {"domains": names, "comparison": dict(zip(names, results))}
 
 
 def _normalize_datetime(value: datetime | None) -> datetime | None:

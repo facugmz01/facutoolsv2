@@ -395,7 +395,6 @@ export const api = {
       request<DomainNotificationSettings>(`/domains/${id}/notifications`, { method: 'PUT', body: JSON.stringify(data) }),
     stats: () => request<DashboardStats>('/domains/stats'),
     export: () => request('/domains/export/json'),
-    compare: (names: string[]) => request('/domains/compare', { method: 'POST', body: JSON.stringify(names) }),
     snapshots: (id: number) => request(`/domains/${id}/snapshots`),
     bulkImport: (domains: Partial<Domain>[]) => request('/domains/bulk-import', { method: 'POST', body: JSON.stringify({ domains }) }),
     startBulkImportJob: (domains: { name: string }[]) => request<BulkImportJob>('/domains/bulk-import/jobs', { method: 'POST', body: JSON.stringify({ domains }) }),

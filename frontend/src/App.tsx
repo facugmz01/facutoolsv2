@@ -12,7 +12,6 @@ import Watchlist from './pages/Watchlist'
 import Monitoring from './pages/Monitoring'
 import MonitorDetail from './pages/MonitorDetail'
 import NotificationTemplates from './pages/NotificationTemplates'
-import Compare from './pages/Compare'
 import SSL from './pages/SSL'
 import SettingsPage from './pages/Settings'
 import LoginPage from './pages/Login'
@@ -79,7 +78,6 @@ export default function App() {
       <Route path="/watchlist" element={<ProtectedRoute permission="watchlist:read"><Shell><Watchlist /></Shell></ProtectedRoute>} />
       <Route path="/monitoring" element={<ProtectedRoute permission="monitoring:read"><Shell><Monitoring /></Shell></ProtectedRoute>} />
       <Route path="/monitoring/:id" element={<ProtectedRoute permission="monitoring:read"><Shell><MonitorDetail /></Shell></ProtectedRoute>} />
-      <Route path="/compare" element={<ProtectedRoute permission="domains:read"><Shell><Compare /></Shell></ProtectedRoute>} />
     </Routes>
   )
 }

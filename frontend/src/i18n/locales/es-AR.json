@@ -93,7 +93,6 @@
     "ssl": "SSL",
     "toolbox": "Caja de Herramientas",
     "networkTools": "Herramientas de Red",
-    "compare": "Comparar",
     "settings": "Configuración",
         "alerts": "Alertas",
     "notificationTemplates": "Plantillas",
@@ -904,27 +903,6 @@
     "uptime24h": "24h",
     "uptime7d": "7d",
     "uptime30d": "30d"
-  },
-  "compare": {
-    "title": "Comparación de Dominios",
-    "subtitle": "Comparó varios dominios lado a lado",
-    "domainPlaceholder": "Dominio {{index}} (ej: ejemplo.com)",
-    "addDomain": "Agregar Dominio",
-    "compare": "Comparar",
-    "comparing": "Comparando...",
-    "yes": "Sí",
-    "no": "No",
-    "metricColumn": "Métrica",
-    "metrics": {
-      "sslValid": "ssl válido",
-      "sslDays": "días de ssl",
-      "isUp": "está activo",
-      "responseTime": "tiempo de respuesta",
-      "emailScore": "puntaje de email",
-      "subdomains": "subdominios",
-      "blacklisted": "en lista negra",
-      "technologies": "tecnologías"
-    }
   },
   "users": {
     "title": "Usuarios",

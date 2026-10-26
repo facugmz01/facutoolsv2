@@ -163,7 +163,6 @@ Only these endpoints are unauthenticated (login flow and healthcheck): `/api/hea
 | POST | `/api/domains` | Add a domain |
 | POST | `/api/domains/{id}/scan` | Full domain scan |
 | GET | `/api/domains/stats` | Dashboard statistics |
-| POST | `/api/domains/compare` | Compare domains |
 | GET | `/api/tools/scan/{domain}` | Live domain scan |
 | GET | `/api/tools/email-security/{domain}` | Email security audit |
 | GET | `/api/tools/propagation/{domain}` | DNS propagation check |

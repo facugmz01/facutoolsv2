@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
-  LayoutDashboard, Globe, Wrench, Bell, Eye, GitCompareArrows, Shield, Settings,
+  LayoutDashboard, Globe, Wrench, Bell, Eye, Shield, Settings,
   Users, KeyRound, LogOut, Menu, X, PanelLeftClose, PanelLeft, FileText, Activity,
 } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
@@ -15,7 +15,6 @@ const mainNav = [
   { to: '/domains', labelKey: 'nav.domains', icon: Globe, permission: 'domains:read' },
   { to: '/ssl', labelKey: 'nav.ssl', icon: Shield, permission: 'ssl:read' },
   { to: '/', labelKey: 'publicTools.catalogTitle', icon: Wrench },
-  { to: '/compare', labelKey: 'nav.compare', icon: GitCompareArrows, permission: 'domains:read' },
   { to: '/alerts', labelKey: 'nav.alerts', icon: Bell, permission: 'alerts:read' },
   { to: '/notification-templates', labelKey: 'nav.notificationTemplates', icon: FileText, permission: 'alerts:read' },
   { to: '/watchlist', labelKey: 'nav.watchlist', icon: Eye, permission: 'watchlist:read' },

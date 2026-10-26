@@ -100,18 +100,6 @@ async def export_domains(
     return {"exported_at": __import__("datetime").datetime.utcnow().isoformat(), "domains": domains}
 
 
-@router.post("/compare")
-async def compare_domains(
-    domain_names: list[str],
-    db: AsyncSession = Depends(get_db),
-    ctx: AuthContext = Depends(require_permissions("domains:read")),
-):
-    try:
-        return await _svc(db, ctx).compare_domains(domain_names)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-
 @router.post("/bulk-import")
 async def bulk_import(
     data: BulkImportRequest,
