@@ -93,8 +93,7 @@
     "ssl": "SSL",
     "toolbox": "Caja de Herramientas",
     "networkTools": "Herramientas de Red",
-    "settings": "Configuración",
-        "alerts": "Alertas",
+    "alerts": "Alertas",
     "notificationTemplates": "Plantillas",
     "watchlist": "Lista de Seguimiento",
     "monitoring": "Monitoreo",
@@ -271,6 +270,7 @@
       "settingsSaved": "Configuración guardada",
       "alertsSaved": "Configuración de alertas guardada",
       "sections": {
+        "settings": "Configuración",
         "alerts": "Alertas",
         "sslCertificate": "Certificado SSL",
         "dnsRecords": "Registros DNS",

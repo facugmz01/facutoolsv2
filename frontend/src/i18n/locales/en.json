@@ -93,8 +93,7 @@
     "ssl": "SSL",
     "toolbox": "Toolbox",
     "networkTools": "Network Tools",
-    "settings": "Settings",
-        "alerts": "Alerts",
+    "alerts": "Alerts",
     "notificationTemplates": "Templates",
     "watchlist": "Watchlist",
     "monitoring": "Monitoring",
@@ -271,6 +270,7 @@
       "settingsSaved": "Settings saved",
       "alertsSaved": "Alert settings saved",
       "sections": {
+        "settings": "Settings",
         "alerts": "Alerts",
         "sslCertificate": "SSL Certificate",
         "dnsRecords": "DNS Records",

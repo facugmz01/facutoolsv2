@@ -5,6 +5,14 @@ All notable changes to FacuTools are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.8] — 2026-10-26
+
+### Changed
+- Domain detail "Settings" card is now compact and only edits tags and notes.
+
+### Fixed
+- Missing `domains.detail.sections.settings` translation (title showed the raw key).
+
 ## [1.1.7] — 2026-10-26
 
 ### Removed
