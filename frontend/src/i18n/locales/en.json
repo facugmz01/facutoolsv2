@@ -268,7 +268,7 @@
         "expiresIn": "Expires in {{count}}d"
       },
       "settingsSaved": "Settings saved",
-      "alertsSaved": "Alert settings saved",
+      "alertsActive": "{{active}} of {{total}} alerts active",
       "sections": {
         "settings": "Settings",
         "alerts": "Alerts",

@@ -268,7 +268,7 @@
         "expiresIn": "Vence en {{count}}d"
       },
       "settingsSaved": "Configuración guardada",
-      "alertsSaved": "Configuración de alertas guardada",
+      "alertsActive": "{{active}} de {{total}} alertas activas",
       "sections": {
         "settings": "Configuración",
         "alerts": "Alertas",
