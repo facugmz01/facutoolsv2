@@ -15,6 +15,8 @@ import {
   InfoCard, IpList, MonitorCard, SSLCard, SubdomainCard, TechStackCard, ThreatIntelCard,
 } from '../components/asset/AssetDetailParts'
 import { useDomain, useDomainMutations, useSubdomains, useSubdomainMutations } from '../hooks'
+import DomainSettingsCard from '../components/asset/DomainSettingsCard'
+import DomainNotificationsCard from '../components/asset/DomainNotificationsCard'
 import { formatDate, formatDateTime } from '../utils/domainValidation'
 import {
   parseBlacklists, parseDnsRecords, parseEmailSecurity, parseHostIntel, parseProviders, parseTechStack, Snapshot, latestSnapshot,
@@ -314,6 +316,10 @@ export default function DomainDetail() {
         </div>
 
         <div className="space-y-4">
+          <DomainSettingsCard domain={domain} onSaved={reloadDomain} />
+
+          <DomainNotificationsCard domainId={domain.id} />
+
           <InfoCard title={t('domains.detail.sections.registrar')} icon={Building2}>
             <p className="text-base font-semibold text-foreground">{domain.registrar || whois?.registrar as string || '—'}</p>
             {typeof whois?.registrant === 'string' && whois.registrant && (

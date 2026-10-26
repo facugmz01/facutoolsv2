@@ -11,7 +11,7 @@ export default function Alerts() {
   const [testResult, setTestResult] = useState<string | null>(null)
   const [testError, setTestError] = useState<string | null>(null)
 
-  const load = () => api.alerts.list().then(setAlerts).catch(console.error)
+  const load = () => api.alerts.list().then(list => setAlerts(list.filter(a => !a.is_read))).catch(console.error)
   useEffect(() => { load() }, [])
 
   const markRead = async (id: number) => {

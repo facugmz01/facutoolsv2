@@ -82,6 +82,45 @@ class DomainService:
         health = max(domain.health_checks, key=lambda h: h.checked_at, default=None) if domain.health_checks else None
         return _domain_to_response(domain, health)
 
+    async def _get_notification_pref(self, domain_id: int) -> tuple[Domain | None, DomainNotificationPreference | None]:
+        result = await self.db.execute(self._org_filter(select(Domain).where(Domain.id == domain_id)))
+        domain = result.scalar_one_or_none()
+        if not domain:
+            return None, None
+        result = await self.db.execute(
+            select(DomainNotificationPreference).where(DomainNotificationPreference.domain_id == domain_id)
+        )
+        return domain, result.scalar_one_or_none()
+
+    @staticmethod
+    def _notification_payload(pref: DomainNotificationPreference | None) -> dict:
+        prefs = {**DEFAULT_NOTIFICATIONS, **(pref.preferences if pref else {})}
+        return {
+            "preferences": {k: bool(prefs.get(k, False)) for k in DEFAULT_NOTIFICATIONS},
+            "include_subdomains": pref.include_subdomains if pref else True,
+        }
+
+    async def get_notifications(self, domain_id: int) -> dict | None:
+        domain, pref = await self._get_notification_pref(domain_id)
+        if not domain:
+            return None
+        return self._notification_payload(pref)
+
+    async def update_notifications(self, domain_id: int, preferences: dict[str, bool], include_subdomains: bool) -> dict | None:
+        domain, pref = await self._get_notification_pref(domain_id)
+        if not domain:
+            return None
+        merged = {**DEFAULT_NOTIFICATIONS, **(pref.preferences if pref else {})}
+        merged.update({k: bool(v) for k, v in preferences.items() if k in DEFAULT_NOTIFICATIONS})
+        if pref:
+            pref.preferences = merged
+            pref.include_subdomains = include_subdomains
+        else:
+            pref = DomainNotificationPreference(domain_id=domain_id, preferences=merged, include_subdomains=include_subdomains)
+            self.db.add(pref)
+        await self.db.commit()
+        return self._notification_payload(pref)
+
     async def create_domain(self, data: DomainCreate, owner_id: int | None = None) -> dict:
         expires_at = _normalize_datetime(data.expires_at)
         domain = Domain(

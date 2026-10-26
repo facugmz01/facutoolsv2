@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.deps import AuthContext, require_permissions
 from app.database import async_session, get_db
-from app.schemas import BulkImportRequest, DomainCreate, DomainResponse, DomainSetupRequest, DomainUpdate, DomainValidateRequest
+from app.schemas import BulkImportRequest, DomainNotificationSettings, DomainCreate, DomainResponse, DomainSetupRequest, DomainUpdate, DomainValidateRequest
 from app.services.domain_service import DomainService, DomainSetupError
 
 router = APIRouter()
@@ -214,6 +214,31 @@ async def get_domain(
     if not domain:
         raise HTTPException(status_code=404, detail="Domain not found")
     return domain
+
+
+@router.get("/{domain_id}/notifications", response_model=DomainNotificationSettings)
+async def get_domain_notifications(
+    domain_id: int,
+    db: AsyncSession = Depends(get_db),
+    ctx: AuthContext = Depends(require_permissions("domains:read")),
+):
+    result = await _svc(db, ctx).get_notifications(domain_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Domain not found")
+    return result
+
+
+@router.put("/{domain_id}/notifications", response_model=DomainNotificationSettings)
+async def update_domain_notifications(
+    domain_id: int,
+    data: DomainNotificationSettings,
+    db: AsyncSession = Depends(get_db),
+    ctx: AuthContext = Depends(require_permissions("domains:write")),
+):
+    result = await _svc(db, ctx).update_notifications(domain_id, data.preferences, data.include_subdomains)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Domain not found")
+    return result
 
 
 @router.post("", status_code=201)

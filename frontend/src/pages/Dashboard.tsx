@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
-  Globe, AlertTriangle, DollarSign, Shield, Activity, TrendingUp, ArrowRight,
+  Globe, AlertTriangle, Shield, Activity, TrendingUp, ArrowRight,
 } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { useDomains, useDashboardStats } from '../hooks'
@@ -60,10 +60,9 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard icon={Globe} label={t('dashboard.stats.totalDomains')} value={stats.total_domains} color="bg-brand-50 dark:bg-brand-950/30 text-brand-700 dark:text-brand-400" />
         <StatCard icon={AlertTriangle} label={t('dashboard.stats.expiringSoon')} value={stats.expiring_soon} sub={t('dashboard.stats.within30Days')} color="bg-yellow-50 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-400" />
-        <StatCard icon={DollarSign} label={t('dashboard.stats.portfolioValue')} value={`$${stats.total_value.toLocaleString()}`} color="bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400" />
         <StatCard icon={Shield} label={t('dashboard.stats.sslExpiring')} value={stats.ssl_expiring_soon} sub={t('dashboard.stats.within30Days')} color="bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400" />
       </div>
 

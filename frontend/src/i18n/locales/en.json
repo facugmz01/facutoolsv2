@@ -94,7 +94,8 @@
     "toolbox": "Toolbox",
     "networkTools": "Network Tools",
     "compare": "Compare",
-    "alerts": "Alerts",
+    "settings": "Settings",
+        "alerts": "Alerts",
     "notificationTemplates": "Templates",
     "watchlist": "Watchlist",
     "monitoring": "Monitoring",
@@ -268,7 +269,10 @@
         "clean": "Clean",
         "expiresIn": "Expires in {{count}}d"
       },
+      "settingsSaved": "Settings saved",
+      "alertsSaved": "Alert settings saved",
       "sections": {
+        "alerts": "Alerts",
         "sslCertificate": "SSL Certificate",
         "dnsRecords": "DNS Records",
         "registrar": "Registrar",
@@ -277,6 +281,7 @@
         "ipAddresses": "IP Addresses"
       },
       "fields": {
+        "renewalCost": "Renewal cost",
         "expiry": "Expiry",
         "registration": "Registration",
         "lastScan": "Last Scan",

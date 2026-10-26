@@ -390,6 +390,9 @@ export const api = {
     update: (id: number, data: Partial<Domain>) => request<Domain>(`/domains/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id: number) => request<void>(`/domains/${id}`, { method: 'DELETE' }),
     scan: (id: number) => request(`/domains/${id}/scan`, { method: 'POST' }),
+    getNotifications: (id: number) => request<DomainNotificationSettings>(`/domains/${id}/notifications`),
+    updateNotifications: (id: number, data: DomainNotificationSettings) =>
+      request<DomainNotificationSettings>(`/domains/${id}/notifications`, { method: 'PUT', body: JSON.stringify(data) }),
     stats: () => request<DashboardStats>('/domains/stats'),
     export: () => request('/domains/export/json'),
     compare: (names: string[]) => request('/domains/compare', { method: 'POST', body: JSON.stringify(names) }),
