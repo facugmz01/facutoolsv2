@@ -11,7 +11,7 @@ function formatDate(value: string | null): string {
   return new Intl.DateTimeFormat('es-AR', {
     timeZone: getSystemTimeZone(),
     year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
   }).format(date)
 }
 

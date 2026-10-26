@@ -62,6 +62,7 @@ export function formatDateTime(value: string | Date | null | undefined): string 
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    hourCycle: 'h23',
     timeZone: systemTimeZone,
   })
 }
@@ -69,7 +70,7 @@ export function formatDateTime(value: string | Date | null | undefined): string 
 export function formatDateTimeShort(value: string | Date | null | undefined): string {
   const date = parseApiDate(value)
   if (!date) return value ? String(value) : '—'
-  return date.toLocaleString(currentDateLocale(), { dateStyle: 'short', timeStyle: 'short', timeZone: systemTimeZone })
+  return date.toLocaleString(currentDateLocale(), { dateStyle: 'short', timeStyle: 'short', hourCycle: 'h23', timeZone: systemTimeZone })
 }
 
 export function formatDateTimeSeconds(value: string | Date | null | undefined): string {

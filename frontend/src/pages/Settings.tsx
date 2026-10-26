@@ -475,6 +475,7 @@ export default function Settings() {
                 timeZone: current,
                 dateStyle: 'medium',
                 timeStyle: 'long',
+                hourCycle: 'h23',
               }).format(new Date())}
             </p>
           )}
