@@ -5,6 +5,16 @@ All notable changes to FacuTools are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.5] — 2026-10-26
+
+### Added
+- Edit a domain's alert preferences and onboarding details (registrar, expiry, renewal cost, tags, notes) from the domain detail page; new `GET/PUT /api/domains/{id}/notifications`.
+- `/api/health` returns the app version; the sidebar shows it instead of a hardcoded value.
+
+### Changed
+- Dashboard no longer shows the portfolio value card.
+- Alerts page lists only unread alerts.
+
 ## [1.1.4] — 2026-08-03
 
 ### Changed

@@ -90,7 +90,7 @@ app.include_router(monitoring.history_router, tags=["Monitor History"])
 
 @app.get("/api/health")
 async def health_check():
-    return {"status": "ok"}
+    return {"status": "ok", "version": APP_VERSION}
 
 
 @app.get("/api/features", dependencies=[Depends(require_permissions())])

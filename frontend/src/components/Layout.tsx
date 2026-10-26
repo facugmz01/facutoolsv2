@@ -62,6 +62,13 @@ function SidebarContent({
   const location = useLocation()
   const { t } = useTranslation()
   const { user, organization, logout, hasPermission } = useAuth()
+  const [appVersion, setAppVersion] = useState('')
+  useEffect(() => {
+    fetch('/api/health')
+      .then(r => r.json())
+      .then(d => setAppVersion(d.version ?? ''))
+      .catch(() => {})
+  }, [])
   const visibleMain = mainNav.filter((item) => !item.permission || hasPermission(item.permission))
   const visibleAdmin = adminNav.filter((item) => !item.permission || hasPermission(item.permission))
 
@@ -183,7 +190,7 @@ function SidebarContent({
               <LanguageSwitcher compact />
               <ThemeToggle compact />
             </div>
-            <div className="text-xs text-muted-foreground/80">{t('nav.versionInfo')}</div>
+            <div className="text-xs text-muted-foreground/80">{t('nav.versionInfo', { version: appVersion })}</div>
           </>
         )}
         {collapsed && (

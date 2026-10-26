@@ -103,7 +103,7 @@
     "roles": "Roles",
     "settings": "Configuración",
     "adminSection": "Administración",
-    "versionInfo": "v1.0.0 · Autoalojado"
+    "versionInfo": "v{{version}} · Autoalojado"
   },
   "auth": {
     "login": {

@@ -103,7 +103,7 @@
     "roles": "Roles",
     "settings": "Settings",
     "adminSection": "Administration",
-    "versionInfo": "v1.0.0 · Self-hosted"
+    "versionInfo": "v{{version}} · Self-hosted"
   },
   "auth": {
     "login": {
