@@ -106,7 +106,10 @@ async def compare_domains(
     db: AsyncSession = Depends(get_db),
     ctx: AuthContext = Depends(require_permissions("domains:read")),
 ):
-    return await _svc(db, ctx).compare_domains(domain_names)
+    try:
+        return await _svc(db, ctx).compare_domains(domain_names)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.post("/bulk-import")

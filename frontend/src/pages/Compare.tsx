@@ -19,8 +19,10 @@ export default function Compare() {
   const [domains, setDomains] = useState(['', ''])
   const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const addField = () => setDomains([...domains, ''])
+  const canAdd = domains.length < 5
   const updateField = (i: number, val: string) => {
     const updated = [...domains]
     updated[i] = val
@@ -31,10 +33,14 @@ export default function Compare() {
     const names = domains.map(d => d.trim()).filter(Boolean)
     if (names.length < 2) return
     setLoading(true)
+    setError(null)
     try {
       const res = await api.domains.compare(names)
       setResult(res)
-    } catch (e) { console.error(e) }
+    } catch (e) {
+      setResult(null)
+      setError(e instanceof Error ? e.message : t('errors.generic'))
+    }
     setLoading(false)
   }
 
@@ -50,12 +56,14 @@ export default function Compare() {
           <input key={i} className="input w-full" placeholder={t('compare.domainPlaceholder', { index: i + 1 })} value={d} onChange={e => updateField(i, e.target.value)} />
         ))}
         <div className="flex gap-2">
-          <button onClick={addField} className="btn-secondary">{t('compare.addDomain')}</button>
+          <button onClick={addField} disabled={!canAdd} className="btn-secondary">{t('compare.addDomain')}</button>
           <button onClick={handleCompare} disabled={loading} className="btn-primary flex items-center gap-2">
             <GitCompareArrows size={16} /> {loading ? t('compare.comparing') : t('compare.compare')}
           </button>
         </div>
       </div>
+
+      {error && <div className="card text-sm text-red-600">{error}</div>}
 
       {result?.comparison && (
         <div className="card overflow-x-auto p-0">
@@ -71,7 +79,13 @@ export default function Compare() {
                 <tr key={metric.key} className="border-b border-border">
                   <td className="p-4 font-medium capitalize">{t(`compare.metrics.${metric.i18nKey}`)}</td>
                   {result.domains.map((d: string) => {
-                    const val = result.comparison[d]?.[metric.key]
+                    const entry = result.comparison[d]
+                    if (entry?.error) {
+                      return metric.key === METRICS[0].key
+                        ? <td key={d} className="p-4 text-red-600 text-sm" rowSpan={METRICS.length}>{entry.error}</td>
+                        : null
+                    }
+                    const val = entry?.[metric.key]
                     return (
                       <td key={d} className="p-4">
                         {typeof val === 'boolean' ? (

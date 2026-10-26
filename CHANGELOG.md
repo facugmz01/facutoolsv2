@@ -5,6 +5,11 @@ All notable changes to FacuTools are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.6] — 2026-10-26
+
+### Fixed
+- Domain comparator: names are validated, normalized and de-duplicated (2–5 domains), scans run in parallel, one failing domain no longer breaks the whole comparison, and errors are shown in the UI.
+
 ## [1.1.5] — 2026-10-26
 
 ### Added
