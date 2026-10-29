@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import asyncio
 import re
 from datetime import datetime
 from urllib.parse import quote
 
 import httpx
+import whois
 
 from app.services.network_utils import is_valid_domain, normalize_domain
 from app.settings_store import SettingsStore
@@ -137,22 +139,22 @@ async def _domscan_failover(domain: str) -> dict | None:
     api_key = SettingsStore.get_str("domscan_api_key")
     if not api_key:
         return None
-    url = f"https://api.domscan.net/v1/whois?domain={quote(domain)}"
-    async with httpx.AsyncClient(timeout=12) as client:
+    url = f"https://domscan.net/v1/whois?domain={quote(domain)}"
+    async with httpx.AsyncClient(timeout=20) as client:
         response = await client.get(url, headers={
             "Accept": "application/json",
-            "Authorization": f"Bearer {api_key}",
+            "X-API-Key": api_key,
         })
         if response.status_code != 200:
             return None
         ds_data = response.json()
-        if "data" in ds_data:
+        if isinstance(ds_data, dict) and isinstance(ds_data.get("data"), dict):
             ds_data = ds_data["data"]
-        if not ds_data or ds_data.get("error"):
+        if not ds_data or ds_data.get("error") or ds_data.get("registered") is False:
             return None
 
         whois = ds_data.get("whois", ds_data)
-        nameservers = whois.get("nameservers", ds_data.get("nameservers", []))
+        nameservers = whois.get("nameservers") or []
         if not isinstance(nameservers, list):
             nameservers = [nameservers]
 
@@ -161,6 +163,7 @@ async def _domscan_failover(domain: str) -> dict | None:
             ("created_date", "registration"), ("creation_date", "registration"),
             ("updated_date", "last changed"),
             ("expires_date", "expiration"), ("expiration_date", "expiration"),
+            ("expiry_date", "expiration"),
         ]:
             if whois.get(src) and dst not in events:
                 events[dst] = whois[src]
@@ -191,6 +194,60 @@ async def _domscan_failover(domain: str) -> dict | None:
         }
 
 
+async def _python_whois_fallback(domain: str) -> dict | None:
+    try:
+        data = await asyncio.to_thread(whois.whois, domain)
+    except Exception:
+        return None
+    if not data or not data.domain_name:
+        return None
+
+    def _fmt(value) -> str | None:
+        if isinstance(value, list):
+            value = next((v for v in value if v), None)
+        if isinstance(value, datetime):
+            return value.strftime("%Y-%m-%d %H:%M:%S UTC")
+        return str(value) if value else None
+
+    events = {}
+    for src, dst in [
+        ("creation_date", "registration"),
+        ("updated_date", "last changed"),
+        ("expiration_date", "expiration"),
+    ]:
+        formatted = _fmt(getattr(data, src, None))
+        if formatted:
+            events[dst] = formatted
+
+    nameservers = data.name_servers or []
+    if not isinstance(nameservers, (list, set, tuple)):
+        nameservers = [nameservers]
+    statuses = data.status or []
+    if not isinstance(statuses, (list, set, tuple)):
+        statuses = [statuses]
+
+    entities = {}
+    registrar = data.registrar
+    if isinstance(registrar, list):
+        registrar = registrar[0] if registrar else None
+    if registrar:
+        entities["registrar"] = {"name": registrar}
+
+    dnssec = str(getattr(data, "dnssec", "") or "").lower()
+    return {
+        "source": "WHOIS (python-whois)",
+        "rdap_url": None,
+        "handle": None,
+        "ldhName": domain,
+        "status": _parse_status([str(s) for s in statuses if s]),
+        "nameservers": sorted({str(ns).lower() for ns in nameservers if ns}),
+        "dnssec": dnssec not in ("", "unsigned", "false", "no"),
+        "events": events,
+        "days_expiry": _days_until_expiry(events["expiration"]) if events.get("expiration") else None,
+        "entities": entities,
+    }
+
+
 async def lookup_rdap(domain: str) -> dict:
     domain = normalize_domain(domain)
     if not is_valid_domain(domain):
@@ -200,10 +257,19 @@ async def lookup_rdap(domain: str) -> dict:
     source = "NIC Argentina (RDAP)" if is_ar else "RDAP Bootstrap (rdap.org)"
     rdap_url = f"https://rdap.nic.ar/domain/{domain}" if is_ar else f"https://rdap.org/domain/{domain}"
 
-    raw = await _rdap_query(rdap_url)
+    try:
+        raw = await _rdap_query(rdap_url)
+    except (httpx.HTTPError, ValueError) as exc:
+        raw = {"_error": f"Error consultando RDAP: {exc}"}
 
     if "_error" in raw:
-        failover = await _domscan_failover(domain)
+        fallback = await _python_whois_fallback(domain)
+        if fallback:
+            return {"domain": domain, "is_ar": is_ar, **fallback}
+        try:
+            failover = await _domscan_failover(domain)
+        except (httpx.HTTPError, ValueError):
+            failover = None
         if failover:
             return {"domain": domain, "is_ar": is_ar, **failover}
         raise ValueError(raw["_error"])

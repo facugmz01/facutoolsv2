@@ -648,8 +648,7 @@ async def fetch_rdap_enriched(domain: str) -> tuple[WHOISInfo | None, dict | Non
         )
         return whois_info, rdap_data
 
-    whois_info = await fetch_whois(domain)
-    return whois_info, None
+    return None, None
 
 
 def _dns_checker_to_records(domain: str, check: dict) -> list[DNSRecord]:
