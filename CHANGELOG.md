@@ -5,6 +5,14 @@ All notable changes to FacuTools are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.11] — 2026-10-29
+
+### Changed
+- WHOIS/RDAP tool and domain monitor share the same lookup chain: RDAP, then `python-whois`, then DomScan as the last resort.
+
+### Fixed
+- DomScan failover: correct host (`domscan.net`), `X-API-Key` header and `expiry_date` field; RDAP network errors and timeouts now trigger the failover instead of aborting the lookup.
+
 ## [1.1.10] — 2026-10-26
 
 ### Changed
