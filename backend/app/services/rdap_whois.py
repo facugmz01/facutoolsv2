@@ -249,6 +249,15 @@ async def _python_whois_fallback(domain: str) -> dict | None:
 
 
 async def lookup_rdap(domain: str) -> dict:
+    return await _lookup(domain, python_whois_fallback=False)
+
+
+async def lookup_rdap_chain(domain: str) -> dict:
+    """RDAP, then python-whois, then DomScan."""
+    return await _lookup(domain, python_whois_fallback=True)
+
+
+async def _lookup(domain: str, python_whois_fallback: bool) -> dict:
     domain = normalize_domain(domain)
     if not is_valid_domain(domain):
         raise ValueError(f"Dominio inválido: {domain}")
@@ -263,7 +272,7 @@ async def lookup_rdap(domain: str) -> dict:
         raw = {"_error": f"Error consultando RDAP: {exc}"}
 
     if "_error" in raw:
-        fallback = await _python_whois_fallback(domain)
+        fallback = await _python_whois_fallback(domain) if python_whois_fallback else None
         if fallback:
             return {"domain": domain, "is_ar": is_ar, **fallback}
         try:

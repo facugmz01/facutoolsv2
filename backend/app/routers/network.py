@@ -11,7 +11,7 @@ from app.services.dns_checker import check_dns
 from app.services.dns_propagation import check_propagation
 from app.services.ip_lookup import lookup_ip, resolve_to_ip
 from app.services.mac_lookup import lookup_mac
-from app.services.rdap_whois import lookup_rdap
+from app.services.rdap_whois import lookup_rdap_chain
 from app.services.port_checker import check_ports, stream_port_scan
 from app.services.smtp_tester import test_smtp
 from app.services.ssl_converter import convert_ssl, list_formats
@@ -96,7 +96,7 @@ async def dns_check(domain: str):
 @router.get("/rdap/{domain}")
 async def rdap_lookup(domain: str):
     try:
-        return await lookup_rdap(domain)
+        return await lookup_rdap_chain(domain)
     except ValueError as e:
         raise _handle_value_error(e)
 
